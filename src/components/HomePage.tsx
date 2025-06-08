@@ -1,11 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Filter, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Search, Star, TrendingUp, Zap, Heart, ShoppingBag } from 'lucide-react';
 import ProductCard from './ProductCard';
-import { products, categories, banners } from '@/data/products';
 import { Product } from '@/contexts/CartContext';
+import { useProducts } from '@/hooks/useProducts';
+import { useAuth } from '@/contexts/AuthContext';
+
+// Cambiar banner automáticamente cada 3 segundos
+const banners = [
+  { id: 1, title: 'Descubre los mejores productos', subtitle: 'Descubre los mejores productos', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400', color: 'from-coral to-pink-500' },
+  { id: 2, title: 'Ofertas especiales', subtitle: 'Ofertas especiales', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400', color: 'from-seafoam to-emerald-500' },
+  { id: 3, title: 'Productos destacados', subtitle: 'Productos destacados', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400', color: 'from-yellow-400 to-orange-500' },
+  { id: 4, title: 'Envío gratis', subtitle: 'Envío gratis', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400', color: 'from-purple-500 to-indigo-500' },
+];
 
 interface HomePageProps {
   onViewProduct: (product: Product) => void;
@@ -13,135 +19,150 @@ interface HomePageProps {
 }
 
 const HomePage = ({ onViewProduct, onTabChange }: HomePageProps) => {
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentBanner, setCurrentBanner] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { products, loading } = useProducts();
+  const { user } = useAuth();
 
-  // Cambiar banner automáticamente cada 3 segundos
+  // Auto-rotate banners with smooth transition
   useEffect(() => {
-    const timer = setInterval(() => {
+    const interval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
-    }, 3000);
-
-    return () => clearInterval(timer);
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Productos destacados (con mayor rating)
-  const featuredProducts = products
-    .filter(p => p.rating >= 4.6)
-    .slice(0, 6);
+  // Convert Supabase products to display format
+  const convertedProducts: Product[] = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: Number(product.price),
+    image: product.image_url || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400',
+    category: product.category || 'general',
+    rating: 4.5, // Default rating
+    reviews: Math.floor(Math.random() * 1000) + 100, // Random reviews
+    description: product.description || '',
+    stock: product.stock,
+    tags: product.featured ? ['Destacado'] : [],
+  }));
 
-  // Ofertas (productos con descuento)
-  const dealsProducts = products
-    .filter(p => p.discount && p.discount > 0)
-    .slice(0, 4);
+  const filteredProducts = selectedCategory === 'all' 
+    ? convertedProducts 
+    : convertedProducts.filter(product => 
+        product.category?.toLowerCase() === selectedCategory.toLowerCase()
+      );
 
-  // Nuevos productos
-  const newProducts = products
-    .filter(p => p.tags?.includes('Nuevo'))
-    .slice(0, 4);
+  const featuredProducts = convertedProducts.filter(product => 
+    products.find(p => p.id === product.id)?.featured
+  );
+
+  if (loading) {
+    return (
+      <div className="mobile-container flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-ocean border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando productos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mobile-container bg-background">
-      {/* Header */}
-      <div className="safe-area-pt bg-background border-b border-border/50">
-        <div className="p-4 space-y-4">
-          {/* Título y notificaciones */}
-          <div className="flex items-center justify-between">
+      {/* Header with ocean wave gradient */}
+      <div className="safe-area-pt bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 text-white">
+        <div className="p-6 pb-8">
+          <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">¡Hola! 👋</h1>
-              <p className="text-muted-foreground">¿Qué buscas hoy?</p>
+              <h1 className="text-2xl font-bold">¡Hola, {user?.email?.split('@')[0] || 'Amigo'}! 🌊</h1>
+              <p className="text-cyan-100 text-sm">Descubre productos increíbles</p>
             </div>
-            <Button variant="ghost" size="icon" className="rounded-full relative">
-              <Bell className="w-5 h-5" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
-            </Button>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <Heart className="w-6 h-6 text-white animate-soft-pulse" />
+            </div>
           </div>
-
-          {/* Barra de búsqueda */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
+          
+          {/* Ocean-inspired search bar */}
+          <div 
+            className="relative"
+            onClick={() => onTabChange('search')}
+          >
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <input
+              type="text"
               placeholder="Buscar productos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-12 h-12 rounded-xl bg-muted border-0"
+              className="w-full pl-12 pr-4 py-4 bg-white/90 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-2 focus:ring-white/50 placeholder:text-slate-500 shadow-lg"
+              readOnly
             />
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-lg"
-              onClick={() => onTabChange('search')}
-            >
-              <Filter className="w-5 h-5" />
-            </Button>
           </div>
-
-          {/* Botones de acceso rápido */}
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              className="flex-1 h-10 rounded-xl bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
-            >
-              🔥 Ofertas
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex-1 h-10 rounded-xl bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100"
-            >
-              ✨ Novedades
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex-1 h-10 rounded-xl bg-green-50 border-green-200 text-green-600 hover:bg-green-100"
-            >
-              🏆 Top
-            </Button>
-          </div>
+        </div>
+        
+        {/* Wave decoration */}
+        <div className="relative">
+          <svg viewBox="0 0 1200 120" className="w-full h-8 fill-background">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+          </svg>
         </div>
       </div>
 
-      {/* Contenido scrolleable */}
+      {/* Scrollable content */}
       <div className="pb-24 overflow-y-auto">
-        {/* Banner promocional */}
-        <div className="p-4">
-          <div className="relative h-48 rounded-2xl overflow-hidden">
+        {/* Floating quick access buttons */}
+        <div className="px-6 -mt-6 relative z-10">
+          <div className="flex gap-4">
+            {[
+              { icon: TrendingUp, label: 'Tendencias', color: 'from-coral to-pink-500' },
+              { icon: Zap, label: 'Ofertas', color: 'from-seafoam to-emerald-500' },
+              { icon: Star, label: 'Favoritos', color: 'from-yellow-400 to-orange-500' },
+              { icon: ShoppingBag, label: 'Nuevo', color: 'from-purple-500 to-indigo-500' },
+            ].map((item, index) => (
+              <button
+                key={item.label}
+                className={`flex-1 bg-gradient-to-r ${item.color} text-white p-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-105 animate-float-in`}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <item.icon className="w-6 h-6 mx-auto mb-1" />
+                <span className="text-xs font-medium">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Ocean-wave banner carousel */}
+        <div className="px-6 mt-8">
+          <div className="relative h-48 rounded-3xl overflow-hidden shadow-xl">
             {banners.map((banner, index) => (
               <div
                 key={banner.id}
-                className={`absolute inset-0 transition-opacity duration-500 ${
-                  index === currentBanner ? 'opacity-100' : 'opacity-0'
+                className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                  index === currentBanner ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
                 }`}
               >
-                <div className={`w-full h-full bg-gradient-to-r ${banner.color} flex items-center justify-between p-6 text-white relative overflow-hidden`}>
-                  <div className="flex-1 z-10">
-                    <h2 className="text-2xl font-bold mb-2">{banner.title}</h2>
-                    <p className="text-lg opacity-90 mb-4">{banner.subtitle}</p>
-                    <Button 
-                      variant="secondary" 
-                      className="bg-white text-gray-800 hover:bg-gray-100 rounded-xl"
-                    >
-                      Ver más
-                    </Button>
-                  </div>
-                  <div className="absolute right-0 top-0 w-32 h-full opacity-20">
-                    <img 
-                      src={banner.image} 
-                      alt={banner.title}
-                      className="w-full h-full object-cover"
-                    />
+                <div className={`w-full h-full bg-gradient-to-r ${banner.color} relative overflow-hidden`}>
+                  <img 
+                    src={banner.image} 
+                    alt={banner.title}
+                    className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30"
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                  <div className="relative z-10 p-8 flex flex-col justify-center h-full text-white">
+                    <h3 className="text-2xl font-bold mb-2 animate-gentle-float">{banner.title}</h3>
+                    <p className="text-lg opacity-90">{banner.subtitle}</p>
                   </div>
                 </div>
               </div>
             ))}
-
-            {/* Indicadores del banner */}
-            <div className="absolute bottom-4 left-6 flex gap-2">
+            
+            {/* Soft banner indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
               {banners.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentBanner(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentBanner ? 'bg-white scale-125' : 'bg-white/50'
+                  className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                    index === currentBanner 
+                      ? 'bg-white scale-125' 
+                      : 'bg-white/50 hover:bg-white/75'
                   }`}
                 />
               ))}
@@ -149,96 +170,73 @@ const HomePage = ({ onViewProduct, onTabChange }: HomePageProps) => {
           </div>
         </div>
 
-        {/* Categorías */}
-        <div className="px-4 mb-6">
-          <h2 className="text-xl font-bold mb-4">Categorías</h2>
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+        {/* Soft category selector */}
+        <div className="px-6 mt-8">
+          <h2 className="text-xl font-bold mb-4 text-foreground">Categorías</h2>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
             {categories.map((category, index) => (
               <button
                 key={category.id}
-                onClick={() => onTabChange('categories')}
-                className={`flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl bg-card border border-border hover:shadow-medium transition-all duration-300 hover:scale-105 animate-fade-in`}
-                style={{ animationDelay: `${index * 100}ms` }}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`flex-shrink-0 px-6 py-3 rounded-2xl font-medium transition-all duration-500 animate-float-in ${
+                  selectedCategory === category.id
+                    ? 'bg-gradient-to-r from-ocean to-cyan-500 text-white shadow-lg scale-105'
+                    : 'bg-card text-foreground hover:bg-muted border border-border hover:scale-105'
+                }`}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <span className="text-2xl">{category.icon}</span>
-                <span className="text-sm font-medium whitespace-nowrap">{category.name}</span>
+                <span className="mr-2 text-lg">{category.icon}</span>
+                {category.name}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Ofertas especiales */}
-        {dealsProducts.length > 0 && (
-          <div className="px-4 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">🔥 Ofertas especiales</h2>
-              <Button variant="ghost" className="text-primary">
-                Ver todas <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-              {dealsProducts.map((product, index) => (
-                <div key={product.id} className="flex-shrink-0 w-44">
-                  <ProductCard 
-                    product={product} 
-                    onViewProduct={onViewProduct}
-                    delay={index * 100}
-                  />
-                </div>
+        {/* Featured products with ocean theme */}
+        {featuredProducts.length > 0 && (
+          <div className="px-6 mt-8">
+            <h2 className="text-xl font-bold mb-4 text-foreground flex items-center gap-2">
+              <Star className="w-6 h-6 text-ocean" />
+              Productos destacados
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              {featuredProducts.slice(0, 4).map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onViewProduct={onViewProduct}
+                  delay={index * 100}
+                />
               ))}
             </div>
           </div>
         )}
 
-        {/* Productos nuevos */}
-        {newProducts.length > 0 && (
-          <div className="px-4 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">✨ Nuevos productos</h2>
-              <Button variant="ghost" className="text-primary">
-                Ver todos <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-              {newProducts.map((product, index) => (
-                <div key={product.id} className="flex-shrink-0 w-44">
-                  <ProductCard 
-                    product={product} 
-                    onViewProduct={onViewProduct}
-                    delay={index * 100}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Productos destacados */}
-        <div className="px-4 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">⭐ Productos destacados</h2>
-            <Button variant="ghost" className="text-primary">
-              Ver todos <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
+        {/* Product grid with soft animations */}
+        <div className="px-6 mt-8">
+          <h2 className="text-xl font-bold mb-4 text-foreground">
+            {selectedCategory === 'all' ? 'Todos los productos' : `Categoría: ${categories.find(c => c.id === selectedCategory)?.name}`}
+          </h2>
           <div className="grid grid-cols-2 gap-4">
-            {featuredProducts.map((product, index) => (
-              <ProductCard 
+            {filteredProducts.map((product, index) => (
+              <ProductCard
                 key={product.id}
-                product={product} 
+                product={product}
                 onViewProduct={onViewProduct}
                 delay={index * 100}
               />
             ))}
           </div>
-        </div>
-
-        {/* Banner de envío gratis */}
-        <div className="mx-4 mb-6">
-          <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-6 text-white text-center">
-            <h3 className="text-lg font-bold mb-2">🚚 Envío gratis</h3>
-            <p className="opacity-90">En compras superiores a 50€</p>
-          </div>
+          
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-12">
+              <div className="w-24 h-24 bg-gradient-to-r from-ocean to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-gentle-float">
+                <Search className="w-12 h-12 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">No hay productos</h3>
+              <p className="text-muted-foreground">No se encontraron productos en esta categoría</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -3,51 +3,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tema personalizado para la tienda */
+/* Pacific Ocean-inspired theme */
 @layer base {
   :root {
-    --background: 255 255 255;
-    --foreground: 15 23 42;
+    --background: 252 253 255;
+    --foreground: 30 41 59;
     --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    --card-foreground: 30 41 59;
     --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover-foreground: 30 41 59;
     --primary: 14 165 233;
     --primary-foreground: 255 255 255;
-    --secondary: 241 245 249;
-    --secondary-foreground: 15 23 42;
-    --muted: 248 250 252;
-    --muted-foreground: 100 116 139;
-    --accent: 6 182 212;
-    --accent-foreground: 255 255 255;
+    --secondary: 236 254 255;
+    --secondary-foreground: 22 78 99;
+    --muted: 241 250 255;
+    --muted-foreground: 71 85 105;
+    --accent: 34 211 238;
+    --accent-foreground: 8 51 68;
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
     --border: 226 232 240;
     --input: 226 232 240;
     --ring: 14 165 233;
-    --radius: 0.75rem;
+    --radius: 1rem;
+    
+    /* Pacific-inspired custom properties */
+    --ocean-blue: 6 182 212;
+    --coral: 251 113 133;
+    --seafoam: 52 211 153;
+    --sand: 254 240 138;
+    --deep-blue: 30 64 175;
+    --wave: 147 197 253;
   }
 
   .dark {
-    --background: 2 6 23;
-    --foreground: 248 250 252;
-    --card: 15 23 42;
-    --card-foreground: 248 250 252;
-    --popover: 15 23 42;
-    --popover-foreground: 248 250 252;
-    --primary: 6 182 212;
-    --primary-foreground: 2 6 23;
-    --secondary: 30 41 59;
-    --secondary-foreground: 248 250 252;
-    --muted: 30 41 59;
+    --background: 15 23 42;
+    --foreground: 241 245 249;
+    --card: 30 41 59;
+    --card-foreground: 241 245 249;
+    --popover: 30 41 59;
+    --popover-foreground: 241 245 249;
+    --primary: 34 211 238;
+    --primary-foreground: 15 23 42;
+    --secondary: 51 65 85;
+    --secondary-foreground: 203 213 225;
+    --muted: 51 65 85;
     --muted-foreground: 148 163 184;
-    --accent: 147 51 234;
-    --accent-foreground: 248 250 252;
+    --accent: 14 165 233;
+    --accent-foreground: 241 245 249;
     --destructive: 220 38 127;
-    --destructive-foreground: 248 250 252;
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 6 182 212;
+    --destructive-foreground: 241 245 249;
+    --border: 71 85 105;
+    --input: 71 85 105;
+    --ring: 34 211 238;
+    
+    /* Dark mode pacific colors */
+    --ocean-blue: 34 211 238;
+    --coral: 251 113 133;
+    --seafoam: 52 211 153;
+    --sand: 254 240 138;
+    --deep-blue: 147 197 253;
+    --wave: 30 64 175;
   }
 }
 
@@ -59,138 +75,207 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(34, 211, 238, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(52, 211, 153, 0.05) 0%, transparent 50%);
   }
 
-  /* Estilos personalizados para móvil */
   html {
     scroll-behavior: smooth;
   }
 
-  /* Scrollbar personalizado */
+  /* Pacific-inspired scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
 
   ::-webkit-scrollbar-track {
     @apply bg-muted;
+    border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
+    background: linear-gradient(180deg, rgb(34 211 238), rgb(52 211 153));
+    border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+    background: linear-gradient(180deg, rgb(14 165 233), rgb(34 211 238));
   }
 }
 
 @layer components {
-  /* Botones personalizados */
+  /* Pacific-inspired buttons */
   .btn-primary {
-    @apply bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold 
-           shadow-soft hover:shadow-medium transition-all duration-300 
-           hover:scale-105 active:scale-95;
+    @apply bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-8 py-4 rounded-2xl font-semibold 
+           shadow-lg hover:shadow-xl transition-all duration-500 ease-out
+           hover:scale-105 hover:from-cyan-500 hover:to-blue-600 active:scale-95
+           backdrop-blur-sm;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-xl font-semibold
-           border border-border hover:bg-accent hover:text-accent-foreground
-           transition-all duration-300 hover:scale-105 active:scale-95;
+    @apply bg-gradient-to-r from-slate-50 to-cyan-50 text-slate-700 px-8 py-4 rounded-2xl font-semibold
+           border border-cyan-200 hover:border-cyan-300 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50
+           transition-all duration-500 ease-out hover:scale-105 active:scale-95
+           dark:from-slate-800 dark:to-slate-700 dark:text-slate-200 dark:border-slate-600;
   }
 
-  /* Tarjetas de producto */
+  /* Ocean-wave inspired product cards */
   .product-card {
-    @apply bg-card rounded-2xl p-4 shadow-soft hover:shadow-medium
-           transition-all duration-300 hover:-translate-y-1 border border-border/50;
+    @apply bg-card rounded-3xl p-6 shadow-lg hover:shadow-2xl
+           transition-all duration-700 ease-out hover:-translate-y-2 
+           border border-cyan-100 hover:border-cyan-200
+           backdrop-blur-sm bg-white/90 dark:bg-slate-800/90;
+    background-image: 
+      radial-gradient(circle at top right, rgba(34, 211, 238, 0.1) 0%, transparent 50%);
   }
 
-  /* Efectos de glassmorphism */
+  /* Gentle glassmorphism */
   .glass {
-    @apply backdrop-blur-md bg-white/80 dark:bg-gray-900/80 border border-white/20;
+    @apply backdrop-blur-xl bg-white/20 dark:bg-slate-900/20 
+           border border-white/30 dark:border-slate-700/30
+           rounded-3xl shadow-xl;
   }
 
-  /* Gradientes personalizados */
-  .gradient-primary {
-    @apply bg-gradient-to-r from-brand-500 to-brand-600;
+  /* Ocean gradients */
+  .gradient-ocean {
+    @apply bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600;
   }
 
-  .gradient-accent {
-    @apply bg-gradient-to-r from-accent to-purple-500;
+  .gradient-coral {
+    @apply bg-gradient-to-br from-pink-400 via-rose-500 to-orange-500;
   }
 
-  /* Animaciones de entrada */
-  .animate-slide-in-bottom {
-    animation: slide-up 0.4s ease-out;
+  .gradient-seafoam {
+    @apply bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600;
   }
 
-  .animate-stagger {
-    animation-delay: calc(var(--stagger) * 100ms);
+  /* Soft animations */
+  .animate-gentle-float {
+    animation: gentle-float 6s ease-in-out infinite;
   }
 
-  /* Badge de notificación */
+  .animate-wave {
+    animation: wave 3s ease-in-out infinite;
+  }
+
+  .animate-soft-pulse {
+    animation: soft-pulse 4s ease-in-out infinite;
+  }
+
+  /* Notification badge with ocean colors */
   .notification-badge {
-    @apply absolute -top-2 -right-2 bg-destructive text-destructive-foreground 
+    @apply absolute -top-2 -right-2 bg-gradient-to-r from-coral to-pink-500 text-white 
            text-xs font-bold rounded-full min-w-[1.25rem] h-5 flex items-center 
-           justify-center animate-pulse-ring;
+           justify-center animate-soft-pulse shadow-lg;
   }
 
-  /* Inputs personalizados */
-  .input-modern {
-    @apply w-full px-4 py-3 bg-muted border border-border rounded-xl
-           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-           transition-all duration-300;
+  /* Soft modern inputs */
+  .input-pacific {
+    @apply w-full px-6 py-4 bg-gradient-to-r from-slate-50 to-cyan-50 
+           border border-cyan-200 rounded-2xl
+           focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent
+           transition-all duration-500 placeholder:text-slate-400
+           dark:from-slate-800 dark:to-slate-700 dark:border-slate-600 dark:text-slate-200;
   }
 
-  /* Contenedor de móvil */
+  /* Mobile container with ocean vibes */
   .mobile-container {
     @apply max-w-sm mx-auto bg-background min-h-screen relative overflow-hidden;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(52, 211, 153, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(147, 197, 253, 0.02) 0%, transparent 50%);
   }
 
-  /* Navegación inferior */
+  /* Soft bottom navigation */
   .bottom-nav {
     @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm
-           bg-card/95 backdrop-blur-lg border-t border-border/50 px-4 py-2
-           safe-area-pb;
+           bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl 
+           border-t border-cyan-200/50 dark:border-slate-700/50 px-4 py-3
+           safe-area-pb shadow-2xl rounded-t-3xl;
   }
 
-  /* SafeArea para iOS */
+  /* Safe area for iOS */
   .safe-area-pb {
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
   .safe-area-pt {
     padding-top: max(1rem, env(safe-area-inset-top));
   }
+
+  /* Auth forms */
+  .auth-container {
+    @apply min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-100 
+           dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900
+           flex items-center justify-center p-4;
+  }
+
+  .auth-card {
+    @apply w-full max-w-md bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl 
+           rounded-3xl shadow-2xl border border-white/20 p-8;
+  }
 }
 
 @layer utilities {
-  /* Utilidades para móvil */
-  .text-balance {
-    text-wrap: balance;
+  .text-ocean {
+    color: rgb(var(--ocean-blue));
+  }
+  
+  .text-coral {
+    color: rgb(var(--coral));
+  }
+  
+  .text-seafoam {
+    color: rgb(var(--seafoam));
   }
 
-  .text-pretty {
-    text-wrap: pretty;
+  .bg-ocean {
+    background-color: rgb(var(--ocean-blue));
   }
+  
+  .bg-coral {
+    background-color: rgb(var(--coral));
+  }
+  
+  .bg-seafoam {
+    background-color: rgb(var(--seafoam));
+  }
+}
 
-  /* Clases de animación con delay */
-  .delay-100 {
-    animation-delay: 100ms;
-  }
+/* Pacific-inspired keyframes */
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
 
-  .delay-200 {
-    animation-delay: 200ms;
-  }
+@keyframes wave {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(5px); }
+}
 
-  .delay-300 {
-    animation-delay: 300ms;
-  }
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
 
-  .delay-400 {
-    animation-delay: 400ms;
-  }
+@keyframes ocean-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
 
-  .delay-500 {
-    animation-delay: 500ms;
-  }
+@keyframes float-in {
+  0% { opacity: 0; transform: translateY(30px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-ocean-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: ocean-shimmer 2s infinite;
+}
+
+.animate-float-in {
+  animation: float-in 0.8s ease-out;
 }

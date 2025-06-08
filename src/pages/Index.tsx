@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CartProvider } from '@/contexts/CartContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import SplashScreen from '@/components/SplashScreen';
+import AuthPage from '@/components/AuthPage';
 import HomePage from '@/components/HomePage';
 import SearchPage from '@/components/SearchPage';
 import CategoriesPage from '@/components/CategoriesPage';
@@ -14,16 +16,32 @@ import SuccessPage from '@/components/SuccessPage';
 import BottomNavigation from '@/components/BottomNavigation';
 import { Product } from '@/contexts/CartContext';
 
-type AppScreen = 'splash' | 'home' | 'search' | 'categories' | 'cart' | 'profile' | 'product-detail' | 'checkout' | 'success';
+type AppScreen = 'splash' | 'auth' | 'home' | 'search' | 'categories' | 'cart' | 'profile' | 'product-detail' | 'checkout' | 'success';
 
-const Index = () => {
+const AppContent = () => {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('splash');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { user, loading } = useAuth();
 
   const handleSplashComplete = () => {
+    if (user) {
+      setCurrentScreen('home');
+    } else {
+      setCurrentScreen('auth');
+    }
+  };
+
+  const handleAuthSuccess = () => {
     setCurrentScreen('home');
   };
+
+  // Redirect to auth if user logs out
+  useEffect(() => {
+    if (!loading && !user && currentScreen !== 'splash' && currentScreen !== 'auth') {
+      setCurrentScreen('auth');
+    }
+  }, [user, loading, currentScreen]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -57,9 +75,16 @@ const Index = () => {
   };
 
   const renderCurrentScreen = () => {
+    if (loading) {
+      return <SplashScreen onComplete={() => {}} />;
+    }
+
     switch (currentScreen) {
       case 'splash':
         return <SplashScreen onComplete={handleSplashComplete} />;
+      
+      case 'auth':
+        return <AuthPage onAuthSuccess={handleAuthSuccess} />;
       
       case 'home':
         return (
@@ -111,22 +136,30 @@ const Index = () => {
     }
   };
 
-  const showBottomNav = !['splash', 'product-detail', 'checkout', 'success'].includes(currentScreen);
+  const showBottomNav = user && !['splash', 'auth', 'product-detail', 'checkout', 'success'].includes(currentScreen);
 
   return (
+    <div className="relative">
+      {renderCurrentScreen()}
+      
+      {showBottomNav && (
+        <BottomNavigation
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
+      )}
+    </div>
+  );
+};
+
+const Index = () => {
+  return (
     <ThemeProvider>
-      <CartProvider>
-        <div className="relative">
-          {renderCurrentScreen()}
-          
-          {showBottomNav && (
-            <BottomNavigation
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-            />
-          )}
-        </div>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 };
